@@ -57,15 +57,14 @@ async function main(msg, token) {
   The Pull request title ${msg} is **${res.valid ? "valid" : "incorrect"}**.`;
 
   if (!res.valid) {
-    out += `
-      Here was the failure report:  
+    out += `Here was the failure report:  
 
-      \`\`\`
-      ${report}
-      \`\`\`
-      
-      Please correct your pull request title to pass. This ensures this work will be correctly noted in the changelog.  
-      Need help? Read https://www.conventionalcommits.org/en/v1.0.0/#summary.  
+\`\`\`
+${report}
+\`\`\`
+
+Please correct your pull request title to pass. This ensures this work will be correctly noted in the changelog.  
+Need help? Read https://www.conventionalcommits.org/en/v1.0.0/#summary.  
     `;
   }
 
