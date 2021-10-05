@@ -84000,7 +84000,7 @@ const CONFIG = {
   extends: ["@commitlint/config-conventional"],
 };
 
-const HEADER = `#pr-message-checker \r\n \r\n`;
+const HEADER = `#pr-title-conventional-checker-action \r\n \r\n`;
 
 async function validatePRMessage(msg) {
   const opts = await load(CONFIG);
@@ -84052,7 +84052,9 @@ async function main(msg, token) {
     out += `
       Here was the failure report:  
 
-      ${report}  
+      \`\`\`
+      ${report}
+      \`\`\`
       
       Please correct your pull request title to pass. This ensures this work will be correctly noted in the changelog.  
       Need help? Read https://www.conventionalcommits.org/en/v1.0.0/#summary.  
