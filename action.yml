@@ -1,0 +1,12 @@
+name: "Pull Request Title Checker for Conventional Commits"
+description: "Validates Pull Request (PR) Title to ensure it conforms to Conventional Commits spec"
+branding:
+  icon: "git-commit"
+  color: "green"
+inputs:
+  github-token:
+    description: If specified, it will write a Github message for both passes and failures. It will delete previous github messages though!
+    required: false
+runs:
+  using: "node12"
+  main: "dist/index.js"
