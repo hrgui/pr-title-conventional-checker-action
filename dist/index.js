@@ -84041,12 +84041,16 @@ async function createPRComment(body, token) {
   });
 }
 
+function displayStatus(isValid) {
+  return `<span color="${isValid ? "green" : "red"}">${isValid ? "valid" : "incorrect"}</span>`;
+}
+
 async function main(msg, token) {
   const res = await validatePRMessage(msg);
   const report = format({ results: [res] }, { color: false });
 
   let out = `${HEADER}
-  The Pull request title ${msg} is **${res.valid ? "valid" : "incorrect"}**.`;
+  The Pull request title ${msg} is **${displayStatus(res.valid)}**.  `;
 
   if (!res.valid) {
     out += `Here was the failure report:  
