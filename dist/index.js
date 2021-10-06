@@ -84042,7 +84042,11 @@ async function createPRComment(body, token) {
 }
 
 function displayStatus(isValid) {
-  return `<span color="${isValid ? "green" : "red"}">${isValid ? "valid" : "incorrect"}</span>`;
+  return `${isValid ? "valid" : "incorrect"} ${
+    isValid
+      ? "![#c5f015](https://via.placeholder.com/15/c5f015/000000?text=+)"
+      : "![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+)"
+  }`;
 }
 
 async function main(msg, token) {
@@ -84050,10 +84054,10 @@ async function main(msg, token) {
   const report = format({ results: [res] }, { color: false });
 
   let out = `${HEADER}
-  The Pull request title ${msg} is **${displayStatus(res.valid)}**.  `;
+  The Pull request title \`${msg}\` is **${displayStatus(res.valid)}**.  `;
 
   if (!res.valid) {
-    out += `Here was the failure report:  
+    out += `\r\n\r\n Here was the failure report:  
 
 \`\`\`
 ${report}
