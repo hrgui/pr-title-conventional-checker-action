@@ -1,25 +1,21 @@
-require("conventional-changelog-conventionalcommits");
-require("@commitlint/config-conventional");
-
+const config = require("@commitlint/config-conventional");
 const core = require("@actions/core");
 const github = require("@actions/github");
-const load = require("@commitlint/load").default;
 const lint = require("@commitlint/lint").default;
 const format = require("@commitlint/format").default;
-
-const CONFIG = {
-  extends: ["@commitlint/config-conventional"],
-};
 
 const HEADER = `#pr-title-conventional-checker-action \r\n \r\n`;
 
 async function validatePRMessage(msg) {
-  const opts = await load(CONFIG);
-  const res = await lint(
-    msg,
-    opts.rules,
-    opts.parserPreset ? { parserOpts: opts.parserPreset.parserOpts } : {}
-  );
+  const res = await lint(msg, config.rules, {
+    headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/,
+    breakingHeaderPattern: /^(\w*)(?:\((.*)\))?!: (.*)$/,
+    headerCorrespondence: ["type", "scope", "subject"],
+    noteKeywords: ["BREAKING CHANGE"],
+    revertPattern: /^(?:Revert|revert:)\s"?([\s\S]+?)"?\s*This reverts commit (\w*)\./i,
+    revertCorrespondence: ["header", "hash"],
+    issuePrefixes: ["#"],
+  });
 
   return res;
 }
