@@ -3528,6 +3528,148 @@ module.exports = {
 
 /***/ }),
 
+/***/ 55635:
+/***/ ((module) => {
+
+module.exports = {
+	parserPreset: 'conventional-changelog-conventionalcommits',
+	rules: {
+		'body-leading-blank': [1, 'always'],
+		'body-max-line-length': [2, 'always', 100],
+		'footer-leading-blank': [1, 'always'],
+		'footer-max-line-length': [2, 'always', 100],
+		'header-max-length': [2, 'always', 100],
+		'subject-case': [
+			2,
+			'never',
+			['sentence-case', 'start-case', 'pascal-case', 'upper-case'],
+		],
+		'subject-empty': [2, 'never'],
+		'subject-full-stop': [2, 'never', '.'],
+		'type-case': [2, 'always', 'lower-case'],
+		'type-empty': [2, 'never'],
+		'type-enum': [
+			2,
+			'always',
+			[
+				'build',
+				'chore',
+				'ci',
+				'docs',
+				'feat',
+				'fix',
+				'perf',
+				'refactor',
+				'revert',
+				'style',
+				'test',
+			],
+		],
+	},
+	prompt: {
+		questions: {
+			type: {
+				description: "Select the type of change that you're committing",
+				enum: {
+					feat: {
+						description: 'A new feature',
+						title: 'Features',
+						emoji: '✨',
+					},
+					fix: {
+						description: 'A bug fix',
+						title: 'Bug Fixes',
+						emoji: '🐛',
+					},
+					docs: {
+						description: 'Documentation only changes',
+						title: 'Documentation',
+						emoji: '📚',
+					},
+					style: {
+						description:
+							'Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)',
+						title: 'Styles',
+						emoji: '💎',
+					},
+					refactor: {
+						description:
+							'A code change that neither fixes a bug nor adds a feature',
+						title: 'Code Refactoring',
+						emoji: '📦',
+					},
+					perf: {
+						description: 'A code change that improves performance',
+						title: 'Performance Improvements',
+						emoji: '🚀',
+					},
+					test: {
+						description: 'Adding missing tests or correcting existing tests',
+						title: 'Tests',
+						emoji: '🚨',
+					},
+					build: {
+						description:
+							'Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)',
+						title: 'Builds',
+						emoji: '🛠',
+					},
+					ci: {
+						description:
+							'Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStack, SauceLabs)',
+						title: 'Continuous Integrations',
+						emoji: '⚙️',
+					},
+					chore: {
+						description: "Other changes that don't modify src or test files",
+						title: 'Chores',
+						emoji: '♻️',
+					},
+					revert: {
+						description: 'Reverts a previous commit',
+						title: 'Reverts',
+						emoji: '🗑',
+					},
+				},
+			},
+			scope: {
+				description:
+					'What is the scope of this change (e.g. component or file name)',
+			},
+			subject: {
+				description:
+					'Write a short, imperative tense description of the change',
+			},
+			body: {
+				description: 'Provide a longer description of the change',
+			},
+			isBreaking: {
+				description: 'Are there any breaking changes?',
+			},
+			breakingBody: {
+				description:
+					'A BREAKING CHANGE commit requires a body. Please enter a longer description of the commit itself',
+			},
+			breaking: {
+				description: 'Describe the breaking changes',
+			},
+			isIssueAffected: {
+				description: 'Does this change affect any open issues?',
+			},
+			issuesBody: {
+				description:
+					'If issues are closed, the commit requires a body. Please enter a longer description of the commit itself',
+			},
+			issues: {
+				description: 'Add issue references (e.g. "fix #123", "re #123".)',
+			},
+		},
+	},
+};
+
+
+/***/ }),
+
 /***/ 78445:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -27398,10 +27540,10 @@ const readFile = Q.denodeify(__nccwpck_require__(35747).readFile)
 const resolve = __nccwpck_require__(85622).resolve
 
 module.exports = Q.all([
-  readFile(__nccwpck_require__.ab + "template.hbs", 'utf-8'),
-  readFile(__nccwpck_require__.ab + "header.hbs", 'utf-8'),
-  readFile(__nccwpck_require__.ab + "commit.hbs", 'utf-8'),
-  readFile(__nccwpck_require__.ab + "footer.hbs", 'utf-8')
+  readFile(__nccwpck_require__.ab + "template1.hbs", 'utf-8'),
+  readFile(__nccwpck_require__.ab + "header1.hbs", 'utf-8'),
+  readFile(__nccwpck_require__.ab + "commit1.hbs", 'utf-8'),
+  readFile(__nccwpck_require__.ab + "footer1.hbs", 'utf-8')
 ])
   .spread((template, header, commit, footer) => {
     const writerOpts = getWriterOpts()
@@ -27498,6 +27640,396 @@ function getWriterOpts () {
     noteGroupsSort: 'title',
     notesSort: compareFunc
   }
+}
+
+
+/***/ }),
+
+/***/ 82429:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const { breakingHeaderPattern } = __nccwpck_require__(88236)()
+
+module.exports = (commit) => {
+  const match = commit.header.match(breakingHeaderPattern)
+  if (match && commit.notes.length === 0) {
+    const noteText = match[3] // the description of the change.
+    commit.notes.push({
+      text: noteText
+    })
+  }
+}
+
+
+/***/ }),
+
+/***/ 87333:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+const Q = __nccwpck_require__(56172)
+const parserOpts = __nccwpck_require__(88236)
+const writerOpts = __nccwpck_require__(10382)
+
+module.exports = function (config) {
+  return Q.all([parserOpts(config), writerOpts(config)])
+    .spread((parserOpts, writerOpts) => {
+      return { parserOpts, writerOpts }
+    })
+}
+
+
+/***/ }),
+
+/***/ 97620:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+const addBangNotes = __nccwpck_require__(82429)
+const parserOpts = __nccwpck_require__(88236)
+
+module.exports = function (config) {
+  return {
+    parserOpts: parserOpts(config),
+
+    whatBump: (commits) => {
+      let level = 2
+      let breakings = 0
+      let features = 0
+
+      commits.forEach(commit => {
+        // adds additional breaking change notes
+        // for the special case, test(system)!: hello world, where there is
+        // a '!' but no 'BREAKING CHANGE' in body:
+        addBangNotes(commit)
+        if (commit.notes.length > 0) {
+          breakings += commit.notes.length
+          level = 0
+        } else if (commit.type === 'feat' || commit.type === 'feature') {
+          features += 1
+          if (level === 2) {
+            level = 1
+          }
+        }
+      })
+
+      if (config.preMajor && level < 2) {
+        level++
+      }
+
+      return {
+        level: level,
+        reason: breakings === 1
+          ? `There is ${breakings} BREAKING CHANGE and ${features} features`
+          : `There are ${breakings} BREAKING CHANGES and ${features} features`
+      }
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ 88761:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const Q = __nccwpck_require__(56172)
+const _ = __nccwpck_require__(90250)
+const conventionalChangelog = __nccwpck_require__(87333)
+const parserOpts = __nccwpck_require__(88236)
+const recommendedBumpOpts = __nccwpck_require__(97620)
+const writerOpts = __nccwpck_require__(10382)
+
+module.exports = function (parameter) {
+  // parameter passed can be either a config object or a callback function
+  if (_.isFunction(parameter)) {
+    // parameter is a callback object
+    const config = {}
+    // FIXME: use presetOpts(config) for callback
+    Q.all([
+      conventionalChangelog(config),
+      parserOpts(config),
+      recommendedBumpOpts(config),
+      writerOpts(config)
+    ]).spread((conventionalChangelog, parserOpts, recommendedBumpOpts, writerOpts) => {
+      parameter(null, { gitRawCommitsOpts: { noMerges: null }, conventionalChangelog, parserOpts, recommendedBumpOpts, writerOpts })
+    })
+  } else {
+    const config = parameter || {}
+    return presetOpts(config)
+  }
+}
+
+function presetOpts (config) {
+  return Q.all([
+    conventionalChangelog(config),
+    parserOpts(config),
+    recommendedBumpOpts(config),
+    writerOpts(config)
+  ]).spread((conventionalChangelog, parserOpts, recommendedBumpOpts, writerOpts) => {
+    return { conventionalChangelog, parserOpts, recommendedBumpOpts, writerOpts }
+  })
+}
+
+
+/***/ }),
+
+/***/ 88236:
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = function (config) {
+  config = defaultConfig(config)
+  return {
+    headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/,
+    breakingHeaderPattern: /^(\w*)(?:\((.*)\))?!: (.*)$/,
+    headerCorrespondence: [
+      'type',
+      'scope',
+      'subject'
+    ],
+    noteKeywords: ['BREAKING CHANGE'],
+    revertPattern: /^(?:Revert|revert:)\s"?([\s\S]+?)"?\s*This reverts commit (\w*)\./i,
+    revertCorrespondence: ['header', 'hash'],
+    issuePrefixes: config.issuePrefixes
+  }
+}
+
+// merge user set configuration with default configuration.
+function defaultConfig (config) {
+  config = config || {}
+  config.issuePrefixes = config.issuePrefixes || ['#']
+  return config
+}
+
+
+/***/ }),
+
+/***/ 10382:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+const addBangNotes = __nccwpck_require__(82429)
+const compareFunc = __nccwpck_require__(24623)
+const Q = __nccwpck_require__(56172)
+const readFile = Q.denodeify(__nccwpck_require__(35747).readFile)
+const resolve = __nccwpck_require__(85622).resolve
+const releaseAsRe = /release-as:\s*\w*@?([0-9]+\.[0-9]+\.[0-9a-z]+(-[0-9a-z.]+)?)\s*/i
+
+/**
+ * Handlebar partials for various property substitutions based on commit context.
+ */
+const owner = '{{#if this.owner}}{{~this.owner}}{{else}}{{~@root.owner}}{{/if}}'
+const host = '{{~@root.host}}'
+const repository = '{{#if this.repository}}{{~this.repository}}{{else}}{{~@root.repository}}{{/if}}'
+
+module.exports = function (config) {
+  config = defaultConfig(config)
+  const commitUrlFormat = expandTemplate(config.commitUrlFormat, {
+    host,
+    owner,
+    repository
+  })
+  const compareUrlFormat = expandTemplate(config.compareUrlFormat, {
+    host,
+    owner,
+    repository
+  })
+  const issueUrlFormat = expandTemplate(config.issueUrlFormat, {
+    host,
+    owner,
+    repository,
+    id: '{{this.issue}}',
+    prefix: '{{this.prefix}}'
+  })
+
+  return Q.all([
+    readFile(__nccwpck_require__.ab + "template.hbs", 'utf-8'),
+    readFile(__nccwpck_require__.ab + "header.hbs", 'utf-8'),
+    readFile(__nccwpck_require__.ab + "commit.hbs", 'utf-8'),
+    readFile(__nccwpck_require__.ab + "footer.hbs", 'utf-8')
+  ])
+    .spread((template, header, commit, footer) => {
+      const writerOpts = getWriterOpts(config)
+
+      writerOpts.mainTemplate = template
+      writerOpts.headerPartial = header
+        .replace(/{{compareUrlFormat}}/g, compareUrlFormat)
+      writerOpts.commitPartial = commit
+        .replace(/{{commitUrlFormat}}/g, commitUrlFormat)
+        .replace(/{{issueUrlFormat}}/g, issueUrlFormat)
+      writerOpts.footerPartial = footer
+
+      return writerOpts
+    })
+}
+
+function findTypeEntry (types, commit) {
+  const typeKey = (commit.revert ? 'revert' : (commit.type || '')).toLowerCase()
+  return types.find((entry) => {
+    if (entry.type !== typeKey) {
+      return false
+    }
+    if (entry.scope && entry.scope !== commit.scope) {
+      return false
+    }
+    return true
+  })
+}
+
+function getWriterOpts (config) {
+  config = defaultConfig(config)
+
+  return {
+    transform: (commit, context) => {
+      let discard = true
+      const issues = []
+      const entry = findTypeEntry(config.types, commit)
+
+      // adds additional breaking change notes
+      // for the special case, test(system)!: hello world, where there is
+      // a '!' but no 'BREAKING CHANGE' in body:
+      addBangNotes(commit)
+
+      // Add an entry in the CHANGELOG if special Release-As footer
+      // is used:
+      if ((commit.footer && releaseAsRe.test(commit.footer)) ||
+          (commit.body && releaseAsRe.test(commit.body))) {
+        discard = false
+      }
+
+      commit.notes.forEach(note => {
+        note.title = 'BREAKING CHANGES'
+        discard = false
+      })
+
+      // breaking changes attached to any type are still displayed.
+      if (discard && (entry === undefined ||
+          entry.hidden)) return
+
+      if (entry) commit.type = entry.section
+
+      if (commit.scope === '*') {
+        commit.scope = ''
+      }
+
+      if (typeof commit.hash === 'string') {
+        commit.shortHash = commit.hash.substring(0, 7)
+      }
+
+      if (typeof commit.subject === 'string') {
+        // Issue URLs.
+        config.issuePrefixes.join('|')
+        const issueRegEx = '(' + config.issuePrefixes.join('|') + ')' + '([0-9]+)'
+        const re = new RegExp(issueRegEx, 'g')
+
+        commit.subject = commit.subject.replace(re, (_, prefix, issue) => {
+          issues.push(prefix + issue)
+          const url = expandTemplate(config.issueUrlFormat, {
+            host: context.host,
+            owner: context.owner,
+            repository: context.repository,
+            id: issue,
+            prefix: prefix
+          })
+          return `[${prefix}${issue}](${url})`
+        })
+        // User URLs.
+        commit.subject = commit.subject.replace(/\B@([a-z0-9](?:-?[a-z0-9/]){0,38})/g, (_, user) => {
+          // TODO: investigate why this code exists.
+          if (user.includes('/')) {
+            return `@${user}`
+          }
+
+          const usernameUrl = expandTemplate(config.userUrlFormat, {
+            host: context.host,
+            owner: context.owner,
+            repository: context.repository,
+            user: user
+          })
+
+          return `[@${user}](${usernameUrl})`
+        })
+      }
+
+      // remove references that already appear in the subject
+      commit.references = commit.references.filter(reference => {
+        if (issues.indexOf(reference.prefix + reference.issue) === -1) {
+          return true
+        }
+
+        return false
+      })
+
+      return commit
+    },
+    groupBy: 'type',
+    // the groupings of commit messages, e.g., Features vs., Bug Fixes, are
+    // sorted based on their probable importance:
+    commitGroupsSort: (a, b) => {
+      const commitGroupOrder = ['Reverts', 'Performance Improvements', 'Bug Fixes', 'Features']
+      const gRankA = commitGroupOrder.indexOf(a.title)
+      const gRankB = commitGroupOrder.indexOf(b.title)
+      if (gRankA >= gRankB) {
+        return -1
+      } else {
+        return 1
+      }
+    },
+    commitsSort: ['scope', 'subject'],
+    noteGroupsSort: 'title',
+    notesSort: compareFunc
+  }
+}
+
+// merge user set configuration with default configuration.
+function defaultConfig (config) {
+  config = config || {}
+  config.types = config.types || [
+    { type: 'feat', section: 'Features' },
+    { type: 'feature', section: 'Features' },
+    { type: 'fix', section: 'Bug Fixes' },
+    { type: 'perf', section: 'Performance Improvements' },
+    { type: 'revert', section: 'Reverts' },
+    { type: 'docs', section: 'Documentation', hidden: true },
+    { type: 'style', section: 'Styles', hidden: true },
+    { type: 'chore', section: 'Miscellaneous Chores', hidden: true },
+    { type: 'refactor', section: 'Code Refactoring', hidden: true },
+    { type: 'test', section: 'Tests', hidden: true },
+    { type: 'build', section: 'Build System', hidden: true },
+    { type: 'ci', section: 'Continuous Integration', hidden: true }
+  ]
+  config.issueUrlFormat = config.issueUrlFormat ||
+    '{{host}}/{{owner}}/{{repository}}/issues/{{id}}'
+  config.commitUrlFormat = config.commitUrlFormat ||
+    '{{host}}/{{owner}}/{{repository}}/commit/{{hash}}'
+  config.compareUrlFormat = config.compareUrlFormat ||
+    '{{host}}/{{owner}}/{{repository}}/compare/{{previousTag}}...{{currentTag}}'
+  config.userUrlFormat = config.userUrlFormat ||
+    '{{host}}/{{user}}'
+  config.issuePrefixes = config.issuePrefixes || ['#']
+
+  return config
+}
+
+// expand on the simple mustache-style templates supported in
+// configuration (we may eventually want to use handlebars for this).
+function expandTemplate (template, context) {
+  let expanded = template
+  Object.keys(context).forEach(key => {
+    expanded = expanded.replace(new RegExp(`{{${key}}}`, 'g'), context[key])
+  })
+  return expanded
 }
 
 
@@ -83990,6 +84522,9 @@ module.exports = require("zlib");
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
+__nccwpck_require__(88761);
+__nccwpck_require__(55635);
+
 const core = __nccwpck_require__(42186);
 const github = __nccwpck_require__(95438);
 const load = __nccwpck_require__(36791).default;

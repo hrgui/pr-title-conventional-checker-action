@@ -1,3 +1,6 @@
+require("conventional-changelog-conventionalcommits");
+require("@commitlint/config-conventional");
+
 const core = require("@actions/core");
 const github = require("@actions/github");
 const load = require("@commitlint/load").default;
