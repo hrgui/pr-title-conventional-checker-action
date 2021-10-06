@@ -82,7 +82,9 @@ Need help? Read https://www.conventionalcommits.org/en/v1.0.0/#summary.
     await createPRComment(out, token);
   }
 
-  core.setFailed(!res.valid);
+  if (!res.valid) {
+    core.setFailed(out);
+  }
 }
 
 main(github.context.payload.pull_request.title, core.getInput("github-token"));
