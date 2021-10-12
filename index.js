@@ -1,3 +1,4 @@
+const fs = require("fs").promises;
 const config = require("@commitlint/config-conventional");
 const core = require("@actions/core");
 const github = require("@actions/github");
@@ -5,19 +6,19 @@ const lint = require("@commitlint/lint").default;
 const format = require("@commitlint/format").default;
 
 const HEADER = `#pr-title-conventional-checker-action \r\n \r\n`;
+const defaultConfigRules = config.rules;
+const defaultOpts = {
+  headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/,
+  breakingHeaderPattern: /^(\w*)(?:\((.*)\))?!: (.*)$/,
+  headerCorrespondence: ["type", "scope", "subject"],
+  noteKeywords: ["BREAKING CHANGE"],
+  revertPattern: /^(?:Revert|revert:)\s"?([\s\S]+?)"?\s*This reverts commit (\w*)\./i,
+  revertCorrespondence: ["header", "hash"],
+  issuePrefixes: ["#"],
+};
 
-async function validatePRMessage(msg) {
-  const res = await lint(msg, config.rules, {
-    headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/,
-    breakingHeaderPattern: /^(\w*)(?:\((.*)\))?!: (.*)$/,
-    headerCorrespondence: ["type", "scope", "subject"],
-    noteKeywords: ["BREAKING CHANGE"],
-    revertPattern: /^(?:Revert|revert:)\s"?([\s\S]+?)"?\s*This reverts commit (\w*)\./i,
-    revertCorrespondence: ["header", "hash"],
-    issuePrefixes: ["#"],
-  });
-
-  return res;
+async function validatePRMessage(msg, rules, opts) {
+  return lint(msg, rules, opts);
 }
 
 async function deletePreviousComments(ghClient, whatToLookFor) {
@@ -56,8 +57,23 @@ function displayStatus(isValid) {
   }`;
 }
 
-async function main(msg, token) {
-  const res = await validatePRMessage(msg);
+async function readJsonFile(filePath) {
+  const raw = await fs.readFile(filePath, "utf-8");
+  return JSON.parse(raw);
+}
+
+async function getConfigRules(filePath) {
+  const json = await readJsonFile(filePath);
+  return json.rules;
+}
+
+async function main(msg, token, configFilePath, optsFilePath) {
+  // get the config files if it is defined, otherwise use defaults (conventional)
+  const config = !!configFilePath ? await getConfigRules(configFilePath) : defaultConfigRules;
+  const opts = !!optsFilePath ? await readJsonFile(optsFilePath) : defaultOpts;
+
+  // validate the PR Message and format - output it in console
+  const res = await validatePRMessage(msg, config, opts);
   const report = format({ results: [res] }, { color: false });
 
   let out = `${HEADER}
@@ -77,13 +93,20 @@ Need help? Read https://www.conventionalcommits.org/en/v1.0.0/#summary.
 
   console.log(out);
 
+  // if token was supplied, create PR comment
   if (token) {
     await createPRComment(out, token);
   }
 
+  // if invalid then set Failed message to why
   if (!res.valid) {
     core.setFailed(out);
   }
 }
 
-main(github.context.payload.pull_request.title, core.getInput("github-token"));
+main(
+  github.context.payload.pull_request.title,
+  core.getInput("github-token"),
+  core.getInput("config-file"),
+  core.getInput("opts-file")
+);

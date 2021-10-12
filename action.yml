@@ -4,6 +4,12 @@ branding:
   icon: "git-commit"
   color: "green"
 inputs:
+  opts-file:
+    description: If specified, will read opts from here. JSON file format only.
+    required: false
+  config-file:
+    description: If specified, will read config.rules from here. JSON file format only.
+    required: false
   github-token:
     description: If specified, it will write a Github message for both passes and failures. It will delete previous github messages though!
     required: false
